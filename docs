@@ -1,1 +1,7 @@
+### 🔒 Environment & Application Hardening
 
+#### 1. Infrastructure-Level Rate Limiting
+To protect the authentication entry point from automated distributed brute-force attacks, global rate-limiting parameters were hardcoded directly into the Docker environment configurations (`.env`):
+```env
+AUTHENTIK_SERVER__RATE_LIMIT__ENABLED=true
+AUTHENTIK_SERVER__RATE_LIMIT__DEFAULT=60m
