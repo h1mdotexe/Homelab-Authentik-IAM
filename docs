@@ -2,7 +2,6 @@
 
 1. Infrastructure-Level Rate Limiting
 To protect the authentication entry point from automated distributed brute-force attacks, global rate-limiting parameters were hardcoded directly into the Docker environment configurations (`.env`):
-```env
 AUTHENTIK_SERVER__RATE_LIMIT__ENABLED=true
 AUTHENTIK_SERVER__RATE_LIMIT__DEFAULT=60m
 
@@ -15,3 +14,12 @@ This drops or throttles unauthorized authentication requests at the ingestion po
        │   (Runs FIRST. If IP is bad -> block user immediately)
        └── 👤 Username Input Field 
            (Runs SECOND. If IP is safe -> let user type their email)
+
+3 🔐 Hardening the Native Multi-Factor Authentication (MFA) Stage
+
+During initial flow analysis, it was discovered that Authentik's native `default-authentication-mfa-validation` stage runs in an *optional enrollment* posture by default via the `default-authentication-flow-authenticator-validate-stage` policy.
+
+Hardening Remediation:
+Rather than introducing redundant stages, the native MFA validation stage (`Order 30`) was hardened:
+1. **Enforced Enrollment:** Configured the stage to intercept un-enrolled identities and force a redirection path to the `default-authenticator-totp-setup` flow.
+2. **Zero-Trust Posture:** Transitioned the authentication boundary from "MFA if available" to "MFA mandatory for session authorization."
