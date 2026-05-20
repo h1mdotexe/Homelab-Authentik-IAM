@@ -1,7 +1,17 @@
-### 🔒 Environment & Application Hardening
+🔒 Environment & Application Hardening - My configurations both within the .env file and using the WebUI.
 
-#### 1. Infrastructure-Level Rate Limiting
+1. Infrastructure-Level Rate Limiting
 To protect the authentication entry point from automated distributed brute-force attacks, global rate-limiting parameters were hardcoded directly into the Docker environment configurations (`.env`):
 ```env
 AUTHENTIK_SERVER__RATE_LIMIT__ENABLED=true
 AUTHENTIK_SERVER__RATE_LIMIT__DEFAULT=60m
+
+2. Defensive Policy Ordering
+To optimize server resource consumption and mitigate Denial of Service (DoS) conditions during an ongoing brute-force event, the reputation policy was bound to `Order 10`. 
+This drops or throttles unauthorized authentication requests at the ingestion point before computing intensive password verification scripts.
+
+📦 [Stage Order 10] Identification Stage
+   └── 🛡️ [Policy Order 10] Reputation/Brute-Force Check 
+       │   (Runs FIRST. If IP is bad -> block user immediately)
+       └── 👤 Username Input Field 
+           (Runs SECOND. If IP is safe -> let user type their email)
