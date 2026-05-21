@@ -1,1 +1,30 @@
+graph TD
+    %% Define Styles and Colors
+    classDef internet fill:#f9f9f9,stroke:#333,stroke-width:2px;
+    classDef cloudflare fill:#f57c00,stroke:#e65100,stroke-width:2px,color:#fff;
+    classDef proxy fill:#2e7d32,stroke:#1b5e20,stroke-width:2px,color:#fff;
+    classDef docker fill:#0277bd,stroke:#01579b,stroke-width:2px,color:#fff;
+    classDef security fill:#c62828,stroke:#b71c1c,stroke-width:2px,color:#fff;
 
+    %% Define Nodes
+    User([🌐 Public Remote User]):::internet
+    CF{"⛅ Cloudflare WAF <br> (DNS / Proxy / DDOS Protect)"}:::cloudflare
+    NPM["🟢 Nginx Proxy Manager <br> (Reverse Proxy / SSL Termination)"]:::proxy
+    
+    subgraph Docker_Host ["🐳 Docker Host Host IP: 192.168.1.53"]
+        AuthCore["🔒 Authentik Core <br> (Port 9000 / Identity Gate)"]:::security
+        AuthWorker["⚙️ Authentik Worker <br> (Background Tasks)"]:::docker
+        Redis[("🧠 Redis <br> (Session Cache)")]:::docker
+        Postgres[("💾 PostgreSQL <br> (User DB)")]:::docker
+    end
+
+    %% Define Traffic Flows
+    User -->|1. Requests auth.iatt.io via HTTPS| CF
+    CF -->|2. Forwards Clean Traffic via Port 443| NPM
+    NPM -->|3. Routes Request internally via HTTP| AuthCore
+    
+    %% Internal Authentik Interconnections
+    AuthCore <==>|Fast Session Sync| Redis
+    AuthCore ===>|Read/Write Identity State| Postgres
+    AuthWorker <==>|Processes Task Queue| Redis
+    AuthWorker ===>|Database Operations| Postgres
