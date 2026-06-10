@@ -23,3 +23,4 @@ Hardening Remediation:
 Rather than introducing redundant stages, the native MFA validation stage (`Order 30`) was hardened:
 1. **Enforced Enrollment:** Configured the stage to intercept un-enrolled identities and force a redirection path to the `default-authenticator-totp-setup` flow.
 2. **Zero-Trust Posture:** Transitioned the authentication boundary from "MFA if available" to "MFA mandatory for session authorization."
+--> Edited the defualt-authentication-mfa-validation to force the user to configure an authenticator <--
